@@ -23,7 +23,8 @@
     ```
     composer install
     ```
-### Run PhpUnit tests
+### PhpUnit tests
+- Run all test
     ```
     ./vendor/bin/phpunit test/
     ```
