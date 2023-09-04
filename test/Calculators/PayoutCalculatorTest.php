@@ -9,22 +9,22 @@ use Withdrawal\Calculators\PayoutCalculator;
 
 class PayoutCalculatorTest extends TestCase {
 
-    protected const AVAILABLE_BANKNOTES = [100, 50, 20, 10];
+    protected const AVAILABLE_BANK_NOTES = [100, 50, 20, 10];
 
     protected PayoutCalculator $calculator;
 
     public function setUp(): void {
-        $this->calculator = new PayoutCalculator();
+        $this->calculator = new PayoutCalculator(self::AVAILABLE_BANK_NOTES);
     }
 
     /**
      * @dataProvider calculatePayoutProvider
      */
-    public function testCalculatePayout(int $sum, array $expectedPayout) {
+    public function testCalculatePayout(int $amount, array $expectedPayout) {
 
         $this->assertSame(
                 $expectedPayout,
-                $this->calculator->calculatePayout($sum, self::AVAILABLE_BANKNOTES)
+                $this->calculator->calculatePayout($amount)
         );
     }
 

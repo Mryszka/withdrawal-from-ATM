@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Withdrawal\Validators;
 
@@ -8,40 +8,60 @@ use Withdrawal\Exceptions\InvalidArgumentException;
 use Withdrawal\Exceptions\NotEnoughNotesException;
 use Withdrawal\Exceptions\NoteUnavailableException;
 
-class AmountValidator {
+class AmountValidator
+{
 
-    public function checkAmount(
-            int $sum,
-            int $maxNumberOfBanknotes,
-            int $highestDenomination,
-            int $lowestDenomination
-    ): void {
-        $this->checkAmountIsNotNegativ($sum);
-        $this->checkAmountIsNotBiggerThanMax(
-                $sum,
-                $this->maxAmount($maxNumberOfBanknotes, $highestDenomination)
+    /**
+     * @throws InvalidArgumentException
+     * @throws NotEnoughNotesException
+     * @throws NoteUnavailableException
+     */
+    public function checkAmount (
+        int $amount,
+        int $maxNumberOfBankNotes,
+        int $highestNominalValue,
+        int $lowestNominalValue
+    ): void
+    {
+        $this -> checkAmountIsNotNegativ($amount);
+        $this -> checkAmountIsNotBiggerThanMax(
+            $amount,
+            $this -> getMaxAmount($maxNumberOfBankNotes, $highestNominalValue)
         );
-        $this->checkAmountIsPayable($sum, $lowestDenomination);
+        $this -> checkAmountIsPayable($amount, $lowestNominalValue);
     }
 
-    protected function checkAmountIsNotNegativ(int $sum): void {
-        if ($sum < 0) {
+    /**
+     * @throws InvalidArgumentException
+     */
+    protected function checkAmountIsNotNegativ (int $amount): void
+    {
+        if ($amount < 0) {
             throw new InvalidArgumentException();
         }
     }
 
-    protected function checkAmountIsNotBiggerThanMax(int $sum, int $max): void {
-        if ($sum > $max) {
+    /**
+     * @throws NotEnoughNotesException
+     */
+    protected function checkAmountIsNotBiggerThanMax (int $amount, int $maxAmount): void
+    {
+        if ($amount > $maxAmount) {
             throw new NotEnoughNotesException();
         }
     }
 
-    protected function maxAmount(int $maxNumberOfBanknotes, int $highestDenomination): int {
-        return $maxNumberOfBanknotes * $highestDenomination;
+    protected function getMaxAmount (int $maxNumberOfBankNotes, int $highestNominalValue): int
+    {
+        return $maxNumberOfBankNotes * $highestNominalValue;
     }
 
-    protected function checkAmountIsPayable(int $sum, int $lowestDenomination): void {
-        if ($sum % $lowestDenomination !== 0) {
+    /**
+     * @throws NoteUnavailableException
+     */
+    protected function checkAmountIsPayable (int $amount, int $lowestNominalValue): void
+    {
+        if ($amount % $lowestNominalValue !== 0) {
             throw new NoteUnavailableException();
         }
     }

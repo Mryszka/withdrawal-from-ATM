@@ -1,48 +1,58 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Withdrawal\Calculators;
 
-class PayoutCalculator {
+use Withdrawal\Exceptions\NoteUnavailableException;
 
-    protected int $iterator;
-    protected array $result = [];
-    protected array $banknotes;
+class PayoutCalculator
+{
 
-    public function calculatePayout(int $unpaydAmound, array $banknotes): array {
-        $this->prepareBanknoteToWithdraw($banknotes);
-        $banknote = $this->getFirstBanknote();
+    protected int $iterator = 0;
+    protected array $bankNotes = [];
+    protected array $availableNominalValues;
+
+    public function __construct (array $availableNominalValues)
+    {
+        rsort($availableNominalValues);
+        $this -> availableNominalValues = $availableNominalValues;
+    }
+
+    public function calculatePayout (int $unpaydAmound): array
+    {
+
+        $nominalValue = $this -> getFirstNominalValue();
 
         while ($unpaydAmound > 0) {
-            if ($unpaydAmound < $banknote) {
-                $banknote = $this->getNextBanknote();
+            if ($unpaydAmound < $nominalValue) {
+                $nominalValue = $this -> getNextNominalValue();
             } else {
-                $unpaydAmound = $this->withdrawBanknote($banknote, $unpaydAmound);
+                $unpaydAmound = $this -> withdrawBankNote($nominalValue, $unpaydAmound);
             }
         }
 
-        return $this->result;
+        return $this -> bankNotes;
     }
 
-    protected function getNextBanknote(): int {
-        $this->iterator++;
-        return $this->banknotes[$this->iterator];
+    protected function getNextNominalValue (): int
+    {
+        $this -> iterator++;
+        if (!isset($this -> availableNominalValues[$this -> iterator])) {
+            throw new NoteUnavailableException();
+        }
+        return $this -> availableNominalValues[$this -> iterator];
     }
 
-    protected function prepareBanknoteToWithdraw(array $banknotes): void {
-        $this->iterator = 0;
-        rsort($banknotes);
-        $this->banknotes = $banknotes;
+    protected function getFirstNominalValue (): int
+    {
+        return $this -> availableNominalValues[0];
     }
 
-    protected function getFirstBanknote(): int {
-        return $this->banknotes[0];
-    }
-
-    protected function withdrawBanknote(int $banknote, int $unpaydAmound): int {
-        $this->result[] = $banknote;
-        return $unpaydAmound - $banknote;
+    protected function withdrawBankNote (int $nominalValue, int $unpaydAmound): int
+    {
+        $this -> bankNotes[] = $nominalValue;
+        return $unpaydAmound - $nominalValue;
     }
 
 }

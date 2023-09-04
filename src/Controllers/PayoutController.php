@@ -1,21 +1,24 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Withdrawal\Controllers;
 
 use Withdrawal\Services\PayoutService;
 
-class PayoutController {
+class PayoutController
+{
 
     protected PayoutService $service;
 
-    public function __construct(PayoutService $service) {
-        $this->service = $service;
+    public function __construct (PayoutService $service)
+    {
+        $this -> service = $service;
     }
 
-    public function getPayout(int $sum): array {
-        return $this->service->getPayout($sum);
+    public function getPayout ($amount): array
+    {
+        return $this -> service -> getPayout((int) $amount);
     }
 
 }
