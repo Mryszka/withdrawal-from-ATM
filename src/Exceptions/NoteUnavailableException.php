@@ -1,10 +1,11 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace Withdrawal\Exceptions;
 
 use Exception;
 
-class NoteUnavailableException extends Exception
-{
-
+class NoteUnavailableException extends Exception {
+    
 }
