@@ -1,0 +1,20 @@
+version: '3.5'
+
+services:
+    nginx-proxy:
+        container_name: nginx_proxy_atm
+        image: jwilder/nginx-proxy:latest
+        ports:
+            - "80:80"
+        volumes:
+            - /var/run/docker.sock:/tmp/docker.sock:ro
+
+    php:
+        container_name: apache_php_atm
+        build:
+            context: './.docker/php/'
+        volumes:
+            - ./.docker/php/000-default.conf:/etc/apache2/sites-available/000-default.conf
+            - ./:/var/www/html/
+        environment:
+            - VIRTUAL_HOST=project.loc
