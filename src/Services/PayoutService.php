@@ -14,6 +14,12 @@ class PayoutService
 
     protected const AVAILABLE_NOMINAL_VALUES = [100, 50, 20, 10];
     protected const MAX_NUMBER_OF_BANK_NOTES = 10;
+    public array $numberOfAvailableBanknotes = [
+        100 => 10,
+        50 => 10,
+        20 => 10,
+        10 => 10
+    ];
 
     protected PayoutCalculator $calculator;
     protected NominalValueHelper $helper;
@@ -28,7 +34,7 @@ class PayoutService
         $this -> amountValidator = $amountValidator;
         $this -> payoutValidator = $payoutValidator;
 
-        $this -> calculator = new PayoutCalculator(self::AVAILABLE_NOMINAL_VALUES);
+        $this -> calculator = new PayoutCalculator(self::AVAILABLE_NOMINAL_VALUES, $this->numberOfAvailableBanknotes);
         $this -> helper = new NominalValueHelper(self::AVAILABLE_NOMINAL_VALUES);
     }
 
@@ -36,14 +42,14 @@ class PayoutService
     {
         $this -> amountValidator -> checkAmount(
             $amount,
-            self::MAX_NUMBER_OF_BANK_NOTES,
+            $this->numberOfAvailableBanknotes,
             $this -> helper -> getHighestNominalValue(),
             $this -> helper -> getLowestNominalValue()
         );
 
         $payout = $this -> calculator -> calculatePayout($amount);
 
-        $this -> payoutValidator -> checkPayout(self::MAX_NUMBER_OF_BANK_NOTES, $payout);
+       $this->numberOfAvailableBanknotes = $this->calculator-> getChangedAvailableNumberOfBankNote();
 
         return $payout;
     }

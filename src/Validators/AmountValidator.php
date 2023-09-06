@@ -18,7 +18,7 @@ class AmountValidator
      */
     public function checkAmount (
         int $amount,
-        int $maxNumberOfBankNotes,
+        array $maxNumberOfBankNotes,
         int $highestNominalValue,
         int $lowestNominalValue
     ): void
@@ -51,9 +51,14 @@ class AmountValidator
         }
     }
 
-    protected function getMaxAmount (int $maxNumberOfBankNotes, int $highestNominalValue): int
+    protected function getMaxAmount (array $maxNumberOfBankNotes, int $highestNominalValue): int
     {
-        return $maxNumberOfBankNotes * $highestNominalValue;
+        $result = 0;
+        foreach ($maxNumberOfBankNotes as $number => $value)
+        {
+            $result += $number*$value;
+        }
+        return $result;
     }
 
     /**
