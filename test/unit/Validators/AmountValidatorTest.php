@@ -9,15 +9,18 @@ use Withdrawal\Exceptions\InvalidArgumentException;
 use Withdrawal\Exceptions\NotEnoughNotesException;
 use Withdrawal\Exceptions\NoteUnavailableException;
 use Withdrawal\Validators\AmountValidator;
+use Withdrawal\Helpers\CashHelper;
 
 class AmountValidatorTest extends TestCase
 {
 
     protected AmountValidator $validator;
+    protected MockObject | CashHelper $helper;
 
     public function setUp (): void
     {
-        $this -> validator = new AmountValidator();
+        $this -> helper = $this -> createMock(CashHelper::class);
+        $this -> validator = new AmountValidator($this -> helper);
     }
 
     /**
@@ -25,42 +28,40 @@ class AmountValidatorTest extends TestCase
      */
     public function testCheckAmountThrowException (
         int $amount,
-        int $maxNumberOfBankNotes,
-        int $highestNominalValue,
-        int $lowestNominalValue,
         string $exception
     )
     {
+        $this -> helper -> method('getMaxAmount') -> willReturn(500);
+        $this -> helper -> method('getLowestNominalValue') -> willReturn(10);
         $this -> expectException($exception);
-        $this -> validator -> checkAmount($amount, $maxNumberOfBankNotes, $highestNominalValue, $lowestNominalValue);
+        $this -> validator -> checkAmount($amount);
     }
 
     /**
      * @dataProvider notThrowExceptionProvider
      */
     public function testCheckAmountNotThrowException (
-        int $amount,
-        int $maxNumberOfBankNotes,
-        int $highestNominalValue,
-        int $lowestNominalValue
+        int $amount
     )
     {
+        $this -> helper -> method('getMaxAmount') -> willReturn(500);
+        $this -> helper -> method('getLowestNominalValue') -> willReturn(10);
         $this -> expectNotToPerformAssertions();
-        $this -> validator -> checkAmount($amount, $maxNumberOfBankNotes, $highestNominalValue, $lowestNominalValue);
+        $this -> validator -> checkAmount($amount);
     }
 
     public static function throwExceptionProvider ()
     {
-        yield [2000, 2, 100, 10, NotEnoughNotesException::class];
-        yield [-20, 2, 100, 10, InvalidArgumentException::class];
-        yield [123, 2, 100, 10, NoteUnavailableException::class];
+        yield [2000, NotEnoughNotesException::class];
+        yield [-20, InvalidArgumentException::class];
+        yield [123, NoteUnavailableException::class];
     }
 
     public static function notThrowExceptionProvider ()
     {
-        yield [100, 2, 100, 10];
-        yield [100, 2, 50, 10];
-        yield [80, 10, 100, 10];
+        yield [80];
+        yield [500];
+        yield [0];
     }
 
 }

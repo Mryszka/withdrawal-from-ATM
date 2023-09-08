@@ -7,28 +7,27 @@ namespace Withdrawal\Validators;
 use Withdrawal\Exceptions\InvalidArgumentException;
 use Withdrawal\Exceptions\NotEnoughNotesException;
 use Withdrawal\Exceptions\NoteUnavailableException;
+use Withdrawal\Helpers\CashHelper;
 
 class AmountValidator
 {
+    protected CashHelper $cashHelper;
+    
+    public function __construct (CashHelper $cashHelper)
+    {
+        $this->cashHelper = $cashHelper;
+    }
 
     /**
      * @throws InvalidArgumentException
      * @throws NotEnoughNotesException
      * @throws NoteUnavailableException
      */
-    public function checkAmount (
-        int $amount,
-        array $maxNumberOfBankNotes,
-        int $highestNominalValue,
-        int $lowestNominalValue
-    ): void
+    public function checkAmount (int $amount): void
     {
         $this -> checkAmountIsNotNegativ($amount);
-        $this -> checkAmountIsNotBiggerThanMax(
-            $amount,
-            $this -> getMaxAmount($maxNumberOfBankNotes, $highestNominalValue)
-        );
-        $this -> checkAmountIsPayable($amount, $lowestNominalValue);
+        $this -> checkAmountIsNotBiggerThanMax($amount);
+        $this -> checkAmountIsPayable($amount);
     }
 
     /**
@@ -44,29 +43,19 @@ class AmountValidator
     /**
      * @throws NotEnoughNotesException
      */
-    protected function checkAmountIsNotBiggerThanMax (int $amount, int $maxAmount): void
+    protected function checkAmountIsNotBiggerThanMax (int $amount): void
     {
-        if ($amount > $maxAmount) {
+        if ($amount > $this->cashHelper-> getMaxAmount()) {
             throw new NotEnoughNotesException();
         }
-    }
-
-    protected function getMaxAmount (array $maxNumberOfBankNotes, int $highestNominalValue): int
-    {
-        $result = 0;
-        foreach ($maxNumberOfBankNotes as $number => $value)
-        {
-            $result += $number*$value;
-        }
-        return $result;
     }
 
     /**
      * @throws NoteUnavailableException
      */
-    protected function checkAmountIsPayable (int $amount, int $lowestNominalValue): void
+    protected function checkAmountIsPayable (int $amount): void
     {
-        if ($amount % $lowestNominalValue !== 0) {
+        if ($amount % $this->cashHelper-> getLowestNominalValue() !== 0) {
             throw new NoteUnavailableException();
         }
     }

@@ -4,64 +4,33 @@ declare(strict_types = 1);
 
 namespace Withdrawal\Calculators;
 
-use Withdrawal\Exceptions\NotEnoughNotesException;
+use Withdrawal\Helpers\CashHelper;
 
 class PayoutCalculator
 {
+    protected CashHelper $cashHelper;
 
-    protected int $iterator = 0;
-    protected array $bankNotes = [];
-    protected array $availableNominalValues;
-    protected array $availableBankNote;
-
-    public function __construct (array $availableNominalValues, array $availableBankNote)
+    public function __construct (CashHelper $cashHelper)
     {
-        rsort($availableNominalValues);
-        $this -> availableNominalValues = $availableNominalValues;
-        $this-> availableBankNote = $availableBankNote;
+        $this -> cashHelper = $cashHelper;
     }
 
     public function calculatePayout (int $unpaydAmound): array
     {
-        $this->bankNotes = [];    
-        $nominalValue = $this -> getFirstNominalValue();
+        $bankNotes = [];
+        $nominalValue = $this -> cashHelper -> getFirstNominalValue();
 
         while ($unpaydAmound > 0) {
-            if ($unpaydAmound < $nominalValue || $this->availableBankNote[$nominalValue] < 1) {
-                $nominalValue = $this -> getNextNominalValue();
+            if ($unpaydAmound < $nominalValue) {
+                $nominalValue = $this -> cashHelper -> getNextNominalValueDesc($nominalValue);
             } else {
-                $unpaydAmound = $this -> withdrawBankNote($nominalValue, $unpaydAmound);
+                $unpaydAmound -= $nominalValue;
+                $bankNotes[] = $nominalValue;
+                $this -> cashHelper -> decreaseNumberOfAvailableBanknotes($nominalValue);
             }
         }
 
-        return $this -> bankNotes;
+        return $bankNotes;
     }
-
-    protected function getNextNominalValue (): int
-    {
-        $this -> iterator++;
-        if (!isset($this -> availableNominalValues[$this -> iterator])) {
-            throw new NotEnoughNotesException();
-        }
-        return $this -> availableNominalValues[$this -> iterator];
-    }
-
-    protected function getFirstNominalValue (): int
-    {
-        return $this -> availableNominalValues[0];
-    }
-
-    protected function withdrawBankNote (int $nominalValue, int $unpaydAmound): int
-    {
-        $this -> bankNotes[] = $nominalValue;
-        $this->availableBankNote[$nominalValue] --;
-        return $unpaydAmound - $nominalValue;
-    }
-    
-    public function getChangedAvailableNumberOfBankNote(): array
-    {
-        return $this->availableBankNote;
-    }
-    
 
 }

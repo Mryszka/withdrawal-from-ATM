@@ -21,7 +21,8 @@
     "autoload-dev": {
         "psr-4":
         { 
-            "WithdrawalTest\\": "tests/" 
+            "WithdrawalTest\\": "tests/unit",
+            "WithdrawalFTest\\": "test/functional" 
         }
     }
 }

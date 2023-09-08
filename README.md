@@ -20,8 +20,16 @@
     ```
     composer install
     ```
-## PhpUnit tests
+## Tests
 - Run all test
     ```
     ./vendor/bin/phpunit test/
+    ```
+- Run unit test
+    ```
+    ./vendor/bin/phpunit test/unit
+    ```
+- Run functional test
+    ```
+    ./vendor/bin/phpunit test/functional
     ```
