@@ -10,22 +10,6 @@ use Withdrawal\Exceptions\NotEnoughNotesException;
 
 class CashHelperTest extends TestCase
 {
-
-    protected CashHelper $helper;
-
-    public function setUp (): void
-    {
-        $this -> helper = new CashHelper(
-            [100, 50, 20, 10],
-            [
-            100 => 10,
-            50 => 10,
-            20 => 10,
-            10 => 10
-            ]
-        );
-    }
-
     public function testGetLowestNominalValueFirstValueIsAvailable ()
     {
         $helper = new CashHelper(
